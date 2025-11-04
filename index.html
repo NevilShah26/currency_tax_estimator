@@ -1,0 +1,106 @@
+<!--
+Filename: index.html
+Description: Basic form + frontend JS that posts to api.php and shows results.
+-->
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Currency + Tax Estimator</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:24px}
+    .card{max-width:720px;margin:auto;padding:18px;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.08)}
+    label{display:block;margin-top:12px}
+    input,select{width:100%;padding:10px;margin-top:6px;border-radius:8px;border:1px solid #ddd}
+    button{margin-top:14px;padding:10px 14px;border-radius:8px;border:none;cursor:pointer}
+    pre{background:#111;color:#fff;padding:12px;border-radius:8px;overflow:auto}
+    .result{margin-top:14px;padding:12px;border-radius:8px;background:#f7f7f7}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Currency + Tax Estimator</h2>
+    <form id="estimator">
+      <label>Currency amount
+        <input type="number" step="0.01" id="amount" name="amount" value="100" required />
+      </label>
+
+      <label>Currency (from)
+        <select id="currency" name="currency">
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+          <option value="AED">AED</option>
+        </select>
+      </label>
+
+      <label>Category
+        <select id="category" name="category">
+          <option value="electronics">Electronics</option>
+          <option value="clothing">Clothing</option>
+          <option value="books">Books</option>
+          <option value="beauty_products">Beauty Products</option>
+        </select>
+      </label>
+
+      <label>Ship to (target currency)
+        <select id="target" name="target">
+          <option value="INR">INR</option>
+        </select>
+      </label>
+
+      <button type="submit">Calculate</button>
+    </form>
+
+    <div id="output" class="result" hidden></div>
+
+    <h4>Notes</h4>
+    <ul>
+      <li>This demo calls <code>api.php</code> on the same server which fetches live exchange rates from exchangerate.host and calculates taxes using stored rates.</li>
+    </ul>
+  </div>
+
+  <script>
+    const form = document.getElementById('estimator');
+    const output = document.getElementById('output');
+
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      output.hidden = true;
+      const data = {
+        amount: parseFloat(document.getElementById('amount').value),
+        from: document.getElementById('currency').value,
+        to: document.getElementById('target').value,
+        category: document.getElementById('category').value
+      };
+
+      output.textContent = 'Calculating...';
+      output.hidden = false;
+
+      try{
+        const res = await fetch('api.php', {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(data)
+        });
+        const json = await res.json();
+        if(!res.ok) throw new Error(json.error || 'Server error');
+
+        output.innerHTML = `<strong>Exchange Rate:</strong> 1 ${data.from} = ${json.rate} ${data.to}<br>`+
+                           `<strong>Converted Value:</strong> ${json.converted_price_formatted}<br>`+
+                           `<strong>Customs Duty (${json.customs_rate}%):</strong> ${json.customs_formatted}<br>`+
+                           `<strong>GST (${json.gst_rate}%):</strong> ${json.gst_formatted}<br>`+
+                           (json.cess ? `<strong>Cess (${json.cess_rate}%):</strong> ${json.cess_formatted}<br>` : '')+
+                           `<hr><strong>Total Landed Cost:</strong> ${json.total_formatted}`;
+      }catch(err){
+        output.textContent = 'Error: '+err.message;
+      }
+    });
+  </script>
+</body>
+</html>
+
+
+
