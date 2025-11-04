@@ -8,6 +8,7 @@
   --color-card-background: #ffffff; /* White card base */
   --color-accent: #FF6B00; /* Sharp, high-energy accent orange/red */
   --color-text-dark: #000000;
+  --color-secondary-accent: #60B7FF; /* Lighter, more vibrant blue for better contrast with black text */
   --border-weight: 4px;
   --shadow-offset: 8px; /* Large, deliberate shadow offset */
 }
@@ -20,7 +21,7 @@
 }
 
 body {
-  /* FONT CHANGE HERE: Using Roboto Mono */
+  /* FONT: Roboto Mono */
   font-family: 'Roboto Mono', monospace; 
   background-color: var(--color-background);
   display: flex;
@@ -32,7 +33,7 @@ body {
 }
 
 h2 {
-  font-weight: 700; /* Adjusted for Roboto Mono weights */
+  font-weight: 700;
   color: var(--color-text-dark);
   margin-bottom: 1.5rem;
   font-size: 2rem;
@@ -64,11 +65,10 @@ li {
 .card {
   background: var(--color-card-background);
   border: var(--border-weight) solid var(--color-primary-dark);
-  border-radius: 0; /* Sharp corners */
+  border-radius: 0;
   padding: 2.5rem;
   width: 100%;
   max-width: 500px;
-  /* The signature Neo-Brutalism hard shadow */
   box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--color-primary-dark);
   transition: transform 0.3s ease-in-out;
   animation: slideIn 0.5s ease-out;
@@ -137,37 +137,55 @@ input[type="number"]:focus,
 select:focus {
   outline: none;
   border-color: var(--color-accent);
-  background-color: #FFFCEF; /* Slightly brighter ivory on focus */
+  background-color: #FFFCEF;
 }
 
-/* Button Styling (High-Contrast Accent) */
-button[type="submit"] {
+/* --- Button Styles --- */
+
+/* Button Base Styles (Applies to both) */
+button {
   padding: 0.85rem 1.5rem;
   border: var(--border-weight) solid var(--color-primary-dark);
   border-radius: 0;
   font-size: 1.1rem;
-  font-weight: 700; /* Adjusted for Roboto Mono weights */
-  color: var(--color-primary-dark);
+  font-weight: 700;
+  color: var(--color-primary-dark); /* FONT COLOR SYNCHRONIZED TO BLACK */
   cursor: pointer;
   text-transform: uppercase;
-  
-  /* Accent color fill */
-  background-color: var(--color-accent);
-  
-  /* Button shadow aligned with card shadow */
   box-shadow: 4px 4px 0 var(--color-primary-dark);
   transition: all 0.2s ease-out;
   margin-top: 1rem;
 }
 
-button[type="submit"]:hover {
-  /* Press effect: move down and right, shrinking the shadow */
-  transform: translate(4px, 4px);
-  box-shadow: 0 0 0 var(--color-primary-dark);
-  background-color: #FF8A3D; /* Slight color shift */
+/* Primary Button: Calculate */
+button[type="submit"] {
+  background-color: var(--color-accent); /* Orange accent */
 }
 
-button[type="submit"]:active {
+/* Secondary Button: Download PDF */
+#downloadPDF {
+  background-color: var(--color-secondary-accent); /* Blue accent */
+  /* color: var(--color-primary-dark); // Inherited from base button style */
+  margin-top: 1rem;
+  width: 100%;
+}
+
+/* Button Hover Effects (Applies to all buttons) */
+button:hover {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--color-primary-dark);
+}
+
+/* Specific Hover adjustments */
+button[type="submit"]:hover {
+  background-color: #FF8A3D;
+}
+
+#downloadPDF:hover {
+  background-color: #79C2FF; /* Slightly darker blue on hover */
+}
+
+button:active {
   transform: translate(6px, 6px);
 }
 
@@ -181,7 +199,15 @@ button[type="submit"]:active {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--color-text-dark);
+  line-height: 1.5;
 }
+
+.result hr {
+  border: none;
+  border-top: 2px solid var(--color-primary-dark);
+  margin: 0.75rem 0;
+}
+
 
 /* Responsive Adjustments */
 @media (max-width: 600px) {
@@ -194,7 +220,7 @@ button[type="submit"]:active {
     margin-bottom: 1rem;
   }
 
-  button[type="submit"] {
+  button {
     font-size: 1rem;
   }
   
