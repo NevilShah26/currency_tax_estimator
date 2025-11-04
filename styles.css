@@ -1,0 +1,205 @@
+/* Import Google Font - Roboto Mono for a coded, mechanical Neo-Brutalism look */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;600;700&display=swap');
+
+/* Neo-Brutalism Color Palette & Variables */
+:root {
+  --color-primary-dark: #000000; /* Black for borders and text */
+  --color-background: #F8F4E3; /* Ivory/Cream background */
+  --color-card-background: #ffffff; /* White card base */
+  --color-accent: #FF6B00; /* Sharp, high-energy accent orange/red */
+  --color-text-dark: #000000;
+  --border-weight: 4px;
+  --shadow-offset: 8px; /* Large, deliberate shadow offset */
+}
+
+/* Base Styles & Typography */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  /* FONT CHANGE HERE: Using Roboto Mono */
+  font-family: 'Roboto Mono', monospace; 
+  background-color: var(--color-background);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  color: var(--color-text-dark);
+}
+
+h2 {
+  font-weight: 700; /* Adjusted for Roboto Mono weights */
+  color: var(--color-text-dark);
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+}
+
+h4 {
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+ul {
+  list-style: square inside;
+  padding-left: 1.2rem;
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-dark);
+}
+
+li {
+  line-height: 1.6;
+}
+
+/* Card Styling (Sharp & Elevated) */
+.card {
+  background: var(--color-card-background);
+  border: var(--border-weight) solid var(--color-primary-dark);
+  border-radius: 0; /* Sharp corners */
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 500px;
+  /* The signature Neo-Brutalism hard shadow */
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--color-primary-dark);
+  transition: transform 0.3s ease-in-out;
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Form and Input/Select Styling */
+#estimator {
+  display: grid;
+  gap: 1.5rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+}
+
+input[type="number"],
+select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  border: 2px solid var(--color-primary-dark);
+  border-radius: 0;
+  background-color: var(--color-background);
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--color-text-dark);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  transition: background-color 0.2s;
+}
+
+/* Custom select arrow */
+label:has(select) {
+  position: relative;
+}
+
+label:has(select)::after {
+  content: '▼';
+  position: absolute;
+  top: 60%;
+  right: 15px;
+  pointer-events: none;
+  color: var(--color-primary-dark);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+input[type="number"]:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  background-color: #FFFCEF; /* Slightly brighter ivory on focus */
+}
+
+/* Button Styling (High-Contrast Accent) */
+button[type="submit"] {
+  padding: 0.85rem 1.5rem;
+  border: var(--border-weight) solid var(--color-primary-dark);
+  border-radius: 0;
+  font-size: 1.1rem;
+  font-weight: 700; /* Adjusted for Roboto Mono weights */
+  color: var(--color-primary-dark);
+  cursor: pointer;
+  text-transform: uppercase;
+  
+  /* Accent color fill */
+  background-color: var(--color-accent);
+  
+  /* Button shadow aligned with card shadow */
+  box-shadow: 4px 4px 0 var(--color-primary-dark);
+  transition: all 0.2s ease-out;
+  margin-top: 1rem;
+}
+
+button[type="submit"]:hover {
+  /* Press effect: move down and right, shrinking the shadow */
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--color-primary-dark);
+  background-color: #FF8A3D; /* Slight color shift */
+}
+
+button[type="submit"]:active {
+  transform: translate(6px, 6px);
+}
+
+/* Result Output Area */
+.result {
+  margin-top: 1.5rem;
+  padding: 1rem 1.5rem;
+  border: var(--border-weight) dashed var(--color-accent);
+  background-color: var(--color-card-background);
+  border-radius: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-text-dark);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  .card {
+    padding: 1.5rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  button[type="submit"] {
+    font-size: 1rem;
+  }
+  
+  :root {
+    --border-weight: 3px;
+    --shadow-offset: 6px;
+  }
+}
