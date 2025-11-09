@@ -1,20 +1,18 @@
-<!--
-Filename: index.html
-Description: Basic form + frontend JS that posts to api.php and shows results.
--->
-
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Currency + Tax Estimator</title>
+  <title>Import Cost & Duty Calculator</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <div class="card">
-    <h2>Currency + Tax Estimator</h2>
+    <h2>Import Cost & Duty Calculator</h2>
+
     <form id="estimator">
+
       <label>Currency amount
         <input type="number" step="0.01" id="amount" name="amount" value="100" required />
       </label>
@@ -28,7 +26,7 @@ Description: Basic form + frontend JS that posts to api.php and shows results.
         </select>
       </label>
 
-        <label>Category
+      <label>Category
         <select id="category" name="category">
           <option value="electronics">Electronics</option>
           <option value="clothing">Clothing</option>
@@ -36,6 +34,9 @@ Description: Basic form + frontend JS that posts to api.php and shows results.
           <option value="beauty_products">Beauty Products</option>
         </select>
       </label>
+
+      <!-- ✅ Dynamic fields will be injected here -->
+      <div id="dynamic-fields"></div>
 
       <label>Ship to (target currency)
         <select id="target" name="target">
@@ -46,54 +47,142 @@ Description: Basic form + frontend JS that posts to api.php and shows results.
       <button type="submit">Calculate</button>
     </form>
 
-
     <div id="output" class="result" hidden></div>
+    <button id="downloadPDF" hidden>Download PDF Receipt</button>
 
     <h4>Notes</h4>
     <ul>
-      <li>This demo calls <code>api.php</code> on the same server which fetches live exchange rates from exchangerate.host and calculates taxes using stored rates.</li>
+      <li>Rates & duties vary by product type. Please select correct category details.</li>
+      <li>Exchange rate is fetched from API & may differ from live forex rate.</li>
+      <li>
+  Taxes and duty rates applied are based on the latest GST Council and Customs revisions 
+  effective from <strong>22 September 2025</strong>, including updated slabs for electronics, 
+  clothing, beauty products, and books.
+</li>
     </ul>
   </div>
 
-  <script>
-    const form = document.getElementById('estimator');
-    const output = document.getElementById('output');
+<script>
+const form = document.getElementById('estimator');
+const output = document.getElementById('output');
+const downloadBtn = document.getElementById('downloadPDF');
+const categorySelect = document.getElementById('category');
+const dynamicFields = document.getElementById('dynamic-fields');
+let lastResult = null;
 
-    form.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      output.hidden = true;
-      const data = {
-        amount: parseFloat(document.getElementById('amount').value),
-        from: document.getElementById('currency').value,
-        to: document.getElementById('target').value,
-        category: document.getElementById('category').value
-      };
+// ✅ Inject category-specific input fields
+function updateDynamicFields() {
+  const cat = categorySelect.value;
+  dynamicFields.innerHTML = "";
 
-      output.textContent = 'Calculating...';
-      output.hidden = false;
+  if (cat === "electronics") {
+    dynamicFields.innerHTML = `
+      <label>Electronics Type
+        <select id="electronicsType">
+          <option value="standard">Standard Electronics (18% GST)</option>
+          <option value="luxury">Premium / Luxury Electronics (28% GST)</option>
+        </select>
+      </label>
+    `;
+  }
 
-      try{
-        const res = await fetch('api.php', {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify(data)
-        });
-        const json = await res.json();
-        if(!res.ok) throw new Error(json.error || 'Server error');
+  
+  if (cat === "books") {
+    dynamicFields.innerHTML = `
+      <label>Book Type
+        <select id="bookType">
+          <option value="printed">Printed Book (0% GST)</option>
+          <option value="ebook">E-Book (18% GST)</option>
+        </select>
+      </label>
+    `;
+  }
 
-        output.innerHTML = `<strong>Exchange Rate:</strong> 1 ${data.from} = ${json.rate} ${data.to}<br>`+
-                           `<strong>Converted Value:</strong> ${json.converted_price_formatted}<br>`+
-                           `<strong>Customs Duty (${json.customs_rate}%):</strong> ${json.customs_formatted}<br>`+
-                           `<strong>GST (${json.gst_rate}%):</strong> ${json.gst_formatted}<br>`+
-                           (json.cess ? `<strong>Cess (${json.cess_rate}%):</strong> ${json.cess_formatted}<br>` : '')+
-                           `<hr><strong>Total Landed Cost:</strong> ${json.total_formatted}`;
-      }catch(err){
-        output.textContent = 'Error: '+err.message;
-      }
+  if (cat === "beauty_products") {
+    dynamicFields.innerHTML = `
+      <label>Beauty Product Type
+        <select id="beautyType">
+          <option value="essential">Essential Toiletry (5% GST)</option>
+          <option value="cosmetic">Standard Cosmetic (18% GST)</option>
+          <option value="luxury">Luxury Perfume / Cosmetic (28% GST)</option>
+        </select>
+      </label>
+    `;
+  }
+}
+
+categorySelect.addEventListener("change", updateDynamicFields);
+updateDynamicFields(); // load on page first time
+
+// ✅ On form submit
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  output.hidden = true;
+  downloadBtn.hidden = true;
+
+  const data = {
+    amount: parseFloat(document.getElementById('amount').value),
+    from: document.getElementById('currency').value,
+    to: document.getElementById('target').value,
+    category: document.getElementById('category').value
+  };
+
+  // ✅ Attach classification rules to request JSON
+  if (data.category === "electronics")
+    data.electronicsType = document.getElementById("electronicsType").value;
+
+  
+  if (data.category === "books")
+    data.bookType = document.getElementById("bookType").value;
+
+  if (data.category === "beauty_products")
+    data.beautyType = document.getElementById("beautyType").value;
+
+  output.textContent = 'Calculating...';
+  output.hidden = false;
+
+  try {
+    const res = await fetch('api.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
     });
-  </script>
+
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Server error');
+
+    lastResult = { ...json, ...data };
+    output.innerHTML = `
+      <strong>Exchange Rate:</strong> 1 ${data.from} = ${json.rate} ${data.to}<br>
+      <strong>Converted Value:</strong> ${json.converted_price_formatted}<br>
+      <strong>Customs Duty (${json.customs_rate}%):</strong> ${json.customs_formatted}<br>
+      <strong>GST (${json.gst_rate}%):</strong> ${json.gst_formatted}<br>
+      ${json.cess ? `<strong>Cess (${json.cess_rate}%):</strong> ${json.cess_formatted}<br>` : ''}
+      <hr><strong>Total Landed Cost:</strong> ${json.total_formatted}
+    `;
+    downloadBtn.hidden = false;
+
+  } catch (err) {
+    output.textContent = 'Error: ' + err.message;
+  }
+});
+
+// ✅ PDF Download
+downloadBtn.addEventListener('click', async () => {
+  if (!lastResult) return alert("Please calculate first!");
+  const res = await fetch('generate_pdf.php', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(lastResult)
+  });
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'receipt.pdf';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+</script>
 </body>
 </html>
-
-
-
